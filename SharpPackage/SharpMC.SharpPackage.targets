@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-    <UsingTask TaskName="SharpPackage.ZipPackageTask" AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(MSBuildThisFileDirectory)/SharpMC.Package.dll" />
+    <UsingTask TaskName="SharpPackage.ZipPackageTask" AssemblyFile="$(MSBuildThisFileDirectory)../tasks/SharpMC.Package.dll" />
 
     <PropertyGroup>
         <SharpPackageOutputPath Condition="'$(SharpPackageOutputPath)' == ''">$(OutputPath)..\packages\</SharpPackageOutputPath>
@@ -9,6 +9,11 @@
     </PropertyGroup>
 
     <Target Name="GenerateSharpPackage" AfterTargets="Build" Condition="'$(SharpPackageSkip)' != 'true'">
+        <Message Importance="High" Text="Starting SharpPackage generation..." />
+        <Message Importance="Normal" Text="ProjectDirectory: $(MSBuildProjectDirectory)" />
+        <Message Importance="Normal" Text="OutputPath: $(OutputPath)" />
+        <Message Importance="Normal" Text="PackageOutputPath: $(SharpPackageOutputPath)" />
+
         <ZipPackageTask
                 ProjectDirectory="$(MSBuildProjectDirectory)"
                 OutputPath="$(OutputPath)"
