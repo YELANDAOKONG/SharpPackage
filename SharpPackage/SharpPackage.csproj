@@ -5,12 +5,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>SharpMC.SharpPackage</PackageId>
-        <Version>1.0.3.3</Version>
+        <Version>1.0.3.4</Version>
         <Title>SharpLoader Package Tool</Title>
         <Authors>YELANDAOKONG</Authors>
         <Description>Package Tool For SharpLoader Modules</Description>
         <PackageProjectUrl>https://github.com/YELANDAOKONG/SharpPackage</PackageProjectUrl>
         <RepositoryUrl>https://github.com/YELANDAOKONG/SharpPackage</RepositoryUrl>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,8 +21,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <!-- Include the task assembly -->
-        <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks/" />
+        <!-- Include the task assembly and all its dependencies -->
+        <None Include="$(OutputPath)\*.dll" Pack="true" PackagePath="tasks/" />
+        <None Include="$(OutputPath)\*.deps.json" Pack="true" PackagePath="tasks/" />
 
         <!-- Include the targets file -->
         <None Include="SharpMC.SharpPackage.targets" Pack="true" PackagePath="build/" />

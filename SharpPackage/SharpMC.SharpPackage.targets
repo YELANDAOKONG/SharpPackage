@@ -14,12 +14,22 @@
         <Message Importance="Normal" Text="OutputPath: $(OutputPath)" />
         <Message Importance="Normal" Text="PackageOutputPath: $(SharpPackageOutputPath)" />
 
+        <!-- Check if tasks assembly exists -->
+        <PropertyGroup>
+            <_SharpPackageTasksPath>$(MSBuildThisFileDirectory)../tasks/SharpMC.Package.dll</_SharpPackageTasksPath>
+        </PropertyGroup>
+
+        <Message Importance="Normal" Text="Looking for tasks assembly at: $(_SharpPackageTasksPath)" />
+
         <ZipPackageTask
                 ProjectDirectory="$(MSBuildProjectDirectory)"
                 OutputPath="$(OutputPath)"
                 PackageOutputPath="$(SharpPackageOutputPath)"
                 ProjectName="$(MSBuildProjectName)"
-                TargetFramework="$(TargetFramework)" />
+                TargetFramework="$(TargetFramework)"
+                Condition="Exists('$(_SharpPackageTasksPath)')" />
+
+        <Error Text="SharpPackage tasks assembly not found at $(_SharpPackageTasksPath)" Condition="!Exists('$(_SharpPackageTasksPath)')" />
     </Target>
 
 </Project>
