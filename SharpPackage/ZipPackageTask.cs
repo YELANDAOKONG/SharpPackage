@@ -28,6 +28,10 @@ public class ZipPackageTask : Task
     [Required]
     public string TargetFramework { get; set; }
 
+    public ITaskItem[] IncludeFiles { get; set; }
+    public ITaskItem[] ExcludeFiles { get; set; }
+    public bool ExcludeSharpLoaderDlls { get; set; } = true;
+
     public override bool Execute()
     {
         try
@@ -36,6 +40,7 @@ public class ZipPackageTask : Task
             Log.LogMessage(MessageImportance.Normal, $"ProjectDirectory: {ProjectDirectory}");
             Log.LogMessage(MessageImportance.Normal, $"OutputPath: {OutputPath}");
             Log.LogMessage(MessageImportance.Normal, $"PackageOutputPath: {PackageOutputPath}");
+            Log.LogMessage(MessageImportance.Normal, $"ExcludeSharpLoaderDlls: {ExcludeSharpLoaderDlls}");
 
             // Validate and load sharp.json
             var sharpJsonPath = Path.Combine(ProjectDirectory, "sharp.json");
@@ -141,6 +146,31 @@ public class ZipPackageTask : Task
                         Log.LogWarning($"Native dependency not found: {dependency}");
                     }
                 }
+
+                // Process user-specified include files
+                Log.LogMessage(MessageImportance.Normal, "Processing user-specified include files...");
+                foreach (var includeFile in IncludeFiles ?? Array.Empty<ITaskItem>())
+                {
+                    var filePath = includeFile.ItemSpec;
+                    var targetPath = includeFile.GetMetadata("TargetPath") ?? Path.GetFileName(filePath);
+                    
+                    if (File.Exists(filePath))
+                    {
+                        Log.LogMessage(MessageImportance.Normal, $"Adding included file: {filePath} -> {targetPath}");
+                        archive.CreateEntryFromFile(filePath, targetPath);
+                    }
+                    else
+                    {
+                        Log.LogWarning($"Included file not found: {filePath}");
+                    }
+                }
+
+                // Process user-specified exclude patterns
+                var excludePatterns = (ExcludeFiles ?? Array.Empty<ITaskItem>())
+                    .Select(item => item.ItemSpec)
+                    .ToList();
+
+                Log.LogMessage(MessageImportance.Normal, $"Exclude patterns: {string.Join(", ", excludePatterns)}");
                     
                 // Add all other DLLs from output directory
                 Log.LogMessage(MessageImportance.Normal, "Adding additional DLLs...");
@@ -148,7 +178,10 @@ public class ZipPackageTask : Task
                     .Where(dll => 
                         Path.GetFileName(dll) != metadata.EntryPoint && 
                         !(metadata.NativeDependencies ?? new List<string>()).Contains(Path.GetFileName(dll)) &&
-                        !IsSharpLoaderDll(Path.GetFileName(dll)))
+                        !excludePatterns.Any(pattern => 
+                            Path.GetFileName(dll).Equals(pattern, StringComparison.OrdinalIgnoreCase) ||
+                            dll.EndsWith(pattern, StringComparison.OrdinalIgnoreCase)) &&
+                        (!ExcludeSharpLoaderDlls || !IsSharpLoaderDll(Path.GetFileName(dll))))
                     .ToList();
                         
                 foreach (var dll in allDlls)

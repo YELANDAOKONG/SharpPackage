@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
-    <UsingTask TaskName="SharpPackage.ZipPackageTask" AssemblyFile="$(MSBuildThisFileDirectory)../tasks/SharpMC.Package.dll" />
+    <UsingTask TaskName="SharpPackage.ZipPackageTask" AssemblyFile="$(MSBuildThisFileDirectory)../tasks/SharpPackage.dll" />
 
     <PropertyGroup>
         <SharpPackageOutputPath Condition="'$(SharpPackageOutputPath)' == ''">$(OutputPath)..\packages\</SharpPackageOutputPath>
@@ -16,7 +16,7 @@
 
         <!-- Check if tasks assembly exists -->
         <PropertyGroup>
-            <_SharpPackageTasksPath>$(MSBuildThisFileDirectory)../tasks/SharpMC.Package.dll</_SharpPackageTasksPath>
+            <_SharpPackageTasksPath>$(MSBuildThisFileDirectory)../tasks/SharpPackage.dll</_SharpPackageTasksPath>
         </PropertyGroup>
 
         <Message Importance="Normal" Text="Looking for tasks assembly at: $(_SharpPackageTasksPath)" />
