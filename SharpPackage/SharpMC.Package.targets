@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+    <UsingTask TaskName="SharpPackage.ZipPackageTask" AssemblyFile="$(MSBuildThisFileDirectory)../tasks/$(MSBuildThisFileDirectory)/SharpMC.Package.dll" />
+
+    <PropertyGroup>
+        <SharpPackageOutputPath Condition="'$(SharpPackageOutputPath)' == ''">$(OutputPath)..\packages\</SharpPackageOutputPath>
+        <SharpPackageSkip Condition="'$(SharpPackageSkip)' == ''">false</SharpPackageSkip>
+    </PropertyGroup>
+
+    <Target Name="GenerateSharpPackage" AfterTargets="Build" Condition="'$(SharpPackageSkip)' != 'true'">
+        <ZipPackageTask
+                ProjectDirectory="$(MSBuildProjectDirectory)"
+                OutputPath="$(OutputPath)"
+                PackageOutputPath="$(SharpPackageOutputPath)"
+                ProjectName="$(MSBuildProjectName)"
+                TargetFramework="$(TargetFramework)" />
+    </Target>
+
+</Project>
