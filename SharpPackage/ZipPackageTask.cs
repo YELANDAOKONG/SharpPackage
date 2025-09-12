@@ -34,13 +34,6 @@ public class ZipPackageTask : Task
         {
             Log.LogMessage(MessageImportance.High, "Starting SharpPackage generation...");
 
-            // Check if project references SharpMC.SharpLoader
-            if (HasSharpLoaderReference())
-            {
-                Log.LogMessage(MessageImportance.High, "Skipping package generation due to SharpMC.SharpLoader reference");
-                return true;
-            }
-
             // Validate and load sharp.json
             var sharpJsonPath = Path.Combine(ProjectDirectory, "sharp.json");
             if (!File.Exists(sharpJsonPath))
@@ -132,11 +125,12 @@ public class ZipPackageTask : Task
                     }
                 }
                     
-                // Add all other DLLs from output directory (except entry point and native dependencies)
+                // Add all other DLLs from output directory (except entry point, native dependencies, and SharpLoader)
                 var allDlls = Directory.GetFiles(OutputPath, "*.dll")
                     .Where(dll => 
                         Path.GetFileName(dll) != metadata.EntryPoint && 
-                        !(metadata.NativeDependencies ?? new List<string>()).Contains(Path.GetFileName(dll)))
+                        !(metadata.NativeDependencies ?? new List<string>()).Contains(Path.GetFileName(dll)) &&
+                        !IsSharpLoaderDll(Path.GetFileName(dll))) // Exclude SharpLoader DLLs
                     .ToList();
                         
                 foreach (var dll in allDlls)
@@ -155,24 +149,11 @@ public class ZipPackageTask : Task
         }
     }
 
-    private bool HasSharpLoaderReference()
+    private bool IsSharpLoaderDll(string dllName)
     {
-        // This is a simplified check. In a real implementation, you might need to 
-        // parse the project file to check for PackageReference or ProjectReference
-        // to SharpMC.SharpLoader
-            
-        // For now, we'll check if the output directory contains any DLL that might
-        // be related to SharpLoader (this is a heuristic approach)
-        try
-        {
-            var dllFiles = Directory.GetFiles(OutputPath, "*.dll");
-            return dllFiles.Any(f => 
-                Path.GetFileName(f).StartsWith("SharpMC.SharpLoader", StringComparison.OrdinalIgnoreCase) ||
-                Path.GetFileName(f).StartsWith("SharpLoader", StringComparison.OrdinalIgnoreCase));
-        }
-        catch
-        {
-            return false;
-        }
+        // Check if the DLL is related to SharpLoader
+        return dllName.StartsWith("SharpMC.SharpLoader", StringComparison.OrdinalIgnoreCase) ||
+               dllName.StartsWith("SharpLoader", StringComparison.OrdinalIgnoreCase) ||
+               dllName.Equals("SharpLoader.dll", StringComparison.OrdinalIgnoreCase);
     }
 }
