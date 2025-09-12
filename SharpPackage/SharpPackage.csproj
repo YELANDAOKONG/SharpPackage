@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>SharpMC.SharpPackage</PackageId>
+        <Version>1.0.3.0</Version>
+        <Title>SharpLoader Package Tool</Title>
+        <Authors>YELANDAOKONG</Authors>
+        <Description>Package Tool For SharpLoader Modules</Description>
+        <PackageProjectUrl>https://github.com/YELANDAOKONG/SharpPackage</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/YELANDAOKONG/SharpPackage</RepositoryUrl>
+    </PropertyGroup>
+
+</Project>
