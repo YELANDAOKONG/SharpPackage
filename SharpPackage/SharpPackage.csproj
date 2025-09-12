@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <PackageId>SharpMC.SharpPackage</PackageId>
-        <Version>1.0.3.1</Version>
+        <Version>1.0.3.2</Version>
         <Title>SharpLoader Package Tool</Title>
         <Authors>YELANDAOKONG</Authors>
         <Description>Package Tool For SharpLoader Modules</Description>
@@ -24,7 +24,7 @@
         <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="tasks/$(TargetFramework)" />
 
         <!-- Include the targets file -->
-        <None Include="SharpMC.Package.targets" Pack="true" PackagePath="build/" />
+        <None Include="SharpMC.SharpPackage.targets" Pack="true" PackagePath="build/" />
     </ItemGroup>
 
 </Project>
