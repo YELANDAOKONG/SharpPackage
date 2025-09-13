@@ -6,6 +6,7 @@
     <PropertyGroup>
         <SharpPackageOutputPath Condition="'$(SharpPackageOutputPath)' == ''">$(OutputPath)..\packages\</SharpPackageOutputPath>
         <SharpPackageSkip Condition="'$(SharpPackageSkip)' == ''">false</SharpPackageSkip>
+        <SharpPackageIncludeAllDlls Condition="'$(SharpPackageIncludeAllDlls)' == ''">false</SharpPackageIncludeAllDlls>
     </PropertyGroup>
 
     <Target Name="GenerateSharpPackage" AfterTargets="Build" Condition="'$(SharpPackageSkip)' != 'true'">
@@ -13,6 +14,7 @@
         <Message Importance="Normal" Text="ProjectDirectory: $(MSBuildProjectDirectory)" />
         <Message Importance="Normal" Text="OutputPath: $(OutputPath)" />
         <Message Importance="Normal" Text="PackageOutputPath: $(SharpPackageOutputPath)" />
+        <Message Importance="Normal" Text="IncludeAllDlls: $(SharpPackageIncludeAllDlls)" />
 
         <!-- Check if tasks assembly exists -->
         <PropertyGroup>
@@ -38,6 +40,7 @@
                 TargetFramework="$(TargetFramework)"
                 IncludeFiles="@(_SharpPackageIncludeFiles)"
                 ExcludeFiles="@(_SharpPackageExcludeFiles)"
+                IncludeAllDlls="$(SharpPackageIncludeAllDlls)"
                 Condition="Exists('$(_SharpPackageTasksPath)')" />
 
         <Error Text="SharpPackage tasks assembly not found at $(_SharpPackageTasksPath)" Condition="!Exists('$(_SharpPackageTasksPath)')" />

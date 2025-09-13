@@ -31,6 +31,7 @@ public class ZipPackageTask : Task
     public ITaskItem[] IncludeFiles { get; set; }
     public ITaskItem[] ExcludeFiles { get; set; }
     public bool ExcludeSharpLoaderDlls { get; set; } = true;
+    public bool IncludeAllDlls { get; set; } = false; // 新增：控制是否包含所有 DLL
 
     public override bool Execute()
     {
@@ -41,6 +42,7 @@ public class ZipPackageTask : Task
             Log.LogMessage(MessageImportance.Normal, $"OutputPath: {OutputPath}");
             Log.LogMessage(MessageImportance.Normal, $"PackageOutputPath: {PackageOutputPath}");
             Log.LogMessage(MessageImportance.Normal, $"ExcludeSharpLoaderDlls: {ExcludeSharpLoaderDlls}");
+            Log.LogMessage(MessageImportance.Normal, $"IncludeAllDlls: {IncludeAllDlls}");
 
             // Validate and load sharp.json
             var sharpJsonPath = Path.Combine(ProjectDirectory, "sharp.json");
@@ -152,7 +154,14 @@ public class ZipPackageTask : Task
                 foreach (var includeFile in IncludeFiles ?? Array.Empty<ITaskItem>())
                 {
                     var filePath = includeFile.ItemSpec;
-                    var targetPath = includeFile.GetMetadata("TargetPath") ?? Path.GetFileName(filePath);
+                    var targetPath = includeFile.GetMetadata("TargetPath");
+                    
+                    // 确保 targetPath 不为空
+                    if (string.IsNullOrEmpty(targetPath))
+                    {
+                        targetPath = Path.GetFileName(filePath);
+                        Log.LogMessage(MessageImportance.Normal, $"Using default target path: {targetPath}");
+                    }
                     
                     if (File.Exists(filePath))
                     {
@@ -172,22 +181,29 @@ public class ZipPackageTask : Task
 
                 Log.LogMessage(MessageImportance.Normal, $"Exclude patterns: {string.Join(", ", excludePatterns)}");
                     
-                // Add all other DLLs from output directory
-                Log.LogMessage(MessageImportance.Normal, "Adding additional DLLs...");
-                var allDlls = Directory.GetFiles(OutputPath, "*.dll")
-                    .Where(dll => 
-                        Path.GetFileName(dll) != metadata.EntryPoint && 
-                        !(metadata.NativeDependencies ?? new List<string>()).Contains(Path.GetFileName(dll)) &&
-                        !excludePatterns.Any(pattern => 
-                            Path.GetFileName(dll).Equals(pattern, StringComparison.OrdinalIgnoreCase) ||
-                            dll.EndsWith(pattern, StringComparison.OrdinalIgnoreCase)) &&
-                        (!ExcludeSharpLoaderDlls || !IsSharpLoaderDll(Path.GetFileName(dll))))
-                    .ToList();
-                        
-                foreach (var dll in allDlls)
+                // 只有在 IncludeAllDlls 为 true 时才添加所有其他 DLL
+                if (IncludeAllDlls)
                 {
-                    Log.LogMessage(MessageImportance.Low, $"Adding DLL: {Path.GetFileName(dll)}");
-                    archive.CreateEntryFromFile(dll, Path.GetFileName(dll));
+                    Log.LogMessage(MessageImportance.Normal, "Adding additional DLLs...");
+                    var allDlls = Directory.GetFiles(OutputPath, "*.dll")
+                        .Where(dll => 
+                            Path.GetFileName(dll) != metadata.EntryPoint && 
+                            !(metadata.NativeDependencies ?? new List<string>()).Contains(Path.GetFileName(dll)) &&
+                            !excludePatterns.Any(pattern => 
+                                Path.GetFileName(dll).Equals(pattern, StringComparison.OrdinalIgnoreCase) ||
+                                dll.EndsWith(pattern, StringComparison.OrdinalIgnoreCase)) &&
+                            (!ExcludeSharpLoaderDlls || !IsSharpLoaderDll(Path.GetFileName(dll))))
+                        .ToList();
+                            
+                    foreach (var dll in allDlls)
+                    {
+                        Log.LogMessage(MessageImportance.Low, $"Adding DLL: {Path.GetFileName(dll)}");
+                        archive.CreateEntryFromFile(dll, Path.GetFileName(dll));
+                    }
+                }
+                else
+                {
+                    Log.LogMessage(MessageImportance.Normal, "Skipping additional DLLs (IncludeAllDlls is false)");
                 }
             }
 
