@@ -21,12 +21,23 @@
 
         <Message Importance="Normal" Text="Looking for tasks assembly at: $(_SharpPackageTasksPath)" />
 
+        <!-- Collect include and exclude files -->
+        <ItemGroup>
+            <_SharpPackageIncludeFiles Include="@(SharpPackageInclude)" />
+            <_SharpPackageExcludeFiles Include="@(SharpPackageExclude)" />
+        </ItemGroup>
+
+        <Message Importance="Normal" Text="Include files: @(_SharpPackageIncludeFiles)" />
+        <Message Importance="Normal" Text="Exclude files: @(_SharpPackageExcludeFiles)" />
+
         <ZipPackageTask
                 ProjectDirectory="$(MSBuildProjectDirectory)"
                 OutputPath="$(OutputPath)"
                 PackageOutputPath="$(SharpPackageOutputPath)"
                 ProjectName="$(MSBuildProjectName)"
                 TargetFramework="$(TargetFramework)"
+                IncludeFiles="@(_SharpPackageIncludeFiles)"
+                ExcludeFiles="@(_SharpPackageExcludeFiles)"
                 Condition="Exists('$(_SharpPackageTasksPath)')" />
 
         <Error Text="SharpPackage tasks assembly not found at $(_SharpPackageTasksPath)" Condition="!Exists('$(_SharpPackageTasksPath)')" />
