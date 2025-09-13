@@ -149,22 +149,60 @@ public class ZipPackageTask : Task
                     }
                 }
 
+                // // Process user-specified include files
+                // Log.LogMessage(MessageImportance.Normal, "Processing user-specified include files...");
+                // foreach (var includeFile in IncludeFiles ?? Array.Empty<ITaskItem>())
+                // {
+                //     var filePath = includeFile.ItemSpec;
+                //     var targetPath = includeFile.GetMetadata("TargetPath");
+                //     
+                //     // 确保 targetPath 不为空
+                //     if (string.IsNullOrEmpty(targetPath))
+                //     {
+                //         targetPath = Path.GetFileName(filePath);
+                //         Log.LogMessage(MessageImportance.Normal, $"Using default target path: {targetPath}");
+                //     }
+                //     
+                //     if (File.Exists(filePath))
+                //     {
+                //         Log.LogMessage(MessageImportance.Normal, $"Adding included file: {filePath} -> {targetPath}");
+                //         archive.CreateEntryFromFile(filePath, targetPath);
+                //     }
+                //     else
+                //     {
+                //         Log.LogWarning($"Included file not found: {filePath}");
+                //     }
+                // }
                 // Process user-specified include files
                 Log.LogMessage(MessageImportance.Normal, "Processing user-specified include files...");
                 foreach (var includeFile in IncludeFiles ?? Array.Empty<ITaskItem>())
                 {
                     var filePath = includeFile.ItemSpec;
                     var targetPath = includeFile.GetMetadata("TargetPath");
-                    
-                    // 确保 targetPath 不为空
-                    if (string.IsNullOrEmpty(targetPath))
-                    {
-                        targetPath = Path.GetFileName(filePath);
-                        Log.LogMessage(MessageImportance.Normal, $"Using default target path: {targetPath}");
-                    }
-                    
+    
+                    Log.LogMessage(MessageImportance.Normal, $"Processing include file: {filePath}");
+    
                     if (File.Exists(filePath))
                     {
+                        if (string.IsNullOrEmpty(targetPath))
+                        {
+                            var fullProjectPath = Path.GetFullPath(ProjectDirectory);
+                            var fullFilePath = Path.GetFullPath(filePath);
+            
+                            if (fullFilePath.StartsWith(fullProjectPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                targetPath = Path.GetRelativePath(fullProjectPath, fullFilePath);
+                                Log.LogMessage(MessageImportance.Normal, $"Using relative path: {targetPath}");
+                            }
+                            else
+                            {
+                                targetPath = Path.GetFileName(filePath);
+                                Log.LogMessage(MessageImportance.Normal, $"Using file name: {targetPath}");
+                            }
+                        }
+        
+                        targetPath = targetPath.Replace('\\', '/');
+        
                         Log.LogMessage(MessageImportance.Normal, $"Adding included file: {filePath} -> {targetPath}");
                         archive.CreateEntryFromFile(filePath, targetPath);
                     }
