@@ -12,6 +12,7 @@
         <PackageProjectUrl>https://github.com/YELANDAOKONG/SharpPackage</PackageProjectUrl>
         <RepositoryUrl>https://github.com/YELANDAOKONG/SharpPackage</RepositoryUrl>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+        <PackageLicenseUrl>https://raw.githubusercontent.com/YELANDAOKONG/SharpPackage/refs/heads/master/LICENSE</PackageLicenseUrl>
     </PropertyGroup>
 
     <ItemGroup>
